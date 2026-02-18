@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FusionSlab Submission Center</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 0; background-color: #ffffff; color: #222; }
+    .header { background-color: #0033a0; color: white; padding: 20px; text-align: center; font-size: 26px; font-weight: bold; width:100%; }
+    .slogan { font-size: 14px; margin-top: 6px; }
+    .container { width: 850px; margin: 40px auto; }
+    h2 { border-bottom: 2px solid #0033a0; padding-bottom: 8px; }
+    .step { display: none; }
+    .active { display: block; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    .search-container { position: relative; }
+    .results { position: absolute; width: 100%; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; display: none; z-index: 1000; }
+    .results div { padding: 8px; cursor: pointer; }
+    .results div:hover { background-color: #f0f0f0; }
+    .row { display: flex; gap: 20px; }
+    .row div { flex: 1; }
+    .nav-buttons { margin-top: 30px; display: flex; justify-content: space-between; }
+    .nav-buttons button { margin-left: 10px; }
+    button { padding: 12px 20px; background-color: #d71920; color: white; border: none; font-size: 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+    button:hover { background-color: #b5151b; }
+    .footer { text-align: center; margin-top: 60px; padding: 20px; font-size: 13px; color: #777; border-top: 1px solid #eee; }
+    .promo-feedback { margin-top: 8px; font-weight: bold; color: green; }
+    .popup {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background-color: #d71920; color: white; font-size: 24px; padding: 30px; border-radius: 10px; text-align: center; z-index: 9999; display: none;
+    }
+    .popup.green { background-color: green; }
+    .popup.red { background-color: #d71920; }
+    .card-review { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 6px; background-color: #f9f9f9; }
+    .total-box { margin-top: 15px; font-weight: bold; font-size: 16px; }
+    .packaging-instructions { margin-top: 20px; padding: 15px; border: 2px solid #0033a0; border-radius: 6px; background-color: #f4f4f4; }
+    .packaging-instructions ol { padding-left: 20px; }
+    #confirmationMessage { font-size: 20px; color: green; text-align: center; margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    FusionSlab
+    <div class="slogan">Where Power Meets Precision.</div>
+  </div>
+
+  <div class="container">
+    <div class="popup" id="popupMessage">MUST FILL OUT ALL BLANKS!</div>
+    <form id="submissionForm">
+
+      <!-- STEP 1 -->
+      <div class="step active">
+        <h2>Step 1: Account Information</h2>
+        <label>Full Name</label>
+        <input type="text" required>
+        <label>Email Address</label>
+        <input type="email" required>
+        <label>Address</label>
+        <input type="text" placeholder="Address" required>
+        <label>Country</label>
+        <input type="text" placeholder="Country" required>
+        <label>State</label>
+        <input type="text" placeholder="State" required>
+        <div class="nav-buttons">
+          <span></span>
+          <button type="button" onclick="nextStepWithValidation()">Next</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Card Info -->
+      <div class="step card-step">
+        <label>Search Pokémon</label>
+        <div class="search-container">
+          <input type="text" class="pokemonSearch" placeholder="Start Typing" autocomplete="off" required data-field="pokemon">
+          <div class="results"></div>
+        </div>
+
+        <label>Card Variant</label>
+        <select required data-field="variant">
+          <option value="">-- Select Variant --</option>
+          <option>Regular</option>
+          <option>Holo</option>
+          <option>Reverse Holo</option>
+          <option>Full Art</option>
+          <option>Alternate Art</option>
+          <option>Secret Rare</option>
+          <option>Gold</option>
+          <option>Promo</option>
+        </select>
+
+        <div class="row">
+          <div>
+            <label>Year</label>
+            <input type="text" placeholder="Start Typing" data-field="year">
+          </div>
+          <div>
+            <label>Set</label>
+            <input type="text" placeholder="Start Typing" data-field="set">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Edition</label>
+            <input type="text" placeholder="Start Typing" data-field="edition">
+          </div>
+          <div>
+            <label>Declared Value ($)</label>
+            <input type="number" placeholder="Start Typing" data-field="declared">
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button type="button" onclick="nextStep()">Next</button>
+          <button type="button" onclick="addAnotherCard()">Add Another Card</button>
+          <button type="button" onclick="nextStepWithValidation()">Next</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Review -->
+      <div class="step">
+        <h2>Step 3: Review</h2>
+        <p>Please review your information before proceeding.</p>
+        <div class="nav-buttons">
+          <button type="button" onclick="prevStep()">Review</button>
+          <button type="button" onclick="nextStepWithValidation()">Proceed to Checkout</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Checkout -->
+      <div class="step">
+        <h2>Step 4: Checkout</h2>
+        <div id="reviewCardsContainer"></div>
+        <label>Promo Code</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="text" id="promoCodeInput" placeholder="Enter Promo Code">
+          <button type="button" id="validatePromoBtn">Validate Code</button>
+        </div>
+        <div class="promo-feedback" id="promoFeedback"></div>
+        <div class="total-box" id="totalBox">Total: $0.00</div>
+        <div class="nav-buttons">
+          <button type="button" onclick="prevStep()">Back</button>
+          <button type="button" onclick="submitFinalStep()">Submit</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Confirmation + Packaging -->
+      <div class="step" id="step5">
+        <h2>Submission Complete</h2>
+        <div id="confirmationMessage">Thank you! Your submission has been sent successfully.</div>
+
+        <div class="packaging-instructions">
+          <h3>Packaging Instructions</h3>
+          <ol>
+            <li>Place your card in a protective sleeve (top loader or similar).</li>
+            <li>Insert the sleeved card into a padded mailer.</li>
+            <li>Include your submission form details (account info + card list).</li>
+            <li>Include your total from checkout, or your card will not be graded/returned.</li>
+          </ol>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="footer">© 2026 FusionSlab. All Rights Reserved.</div>
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+emailjs.init("wTDs1Gkan1ezDUviv"); // Public Key
+
+let currentStep = 0;
+let steps = document.querySelectorAll(".step");
+const popup = document.getElementById("popupMessage");
+let appliedDiscount = 0;
+
+function getTaxRate(country,state){
+  country=country.toLowerCase(); state=state.toLowerCase();
+  if(country==="usa"){ if(state==="ohio") return 0.0825; return 0.07; }
+  else if(country==="canada") return 0.13;
+  return 0.08;
+}
+
+function showStep(index){
+  steps.forEach(s=>s.classList.remove("active"));
+  steps[index].classList.add("active");
+  currentStep=index;
+}
+
+function validateStep(stepIndex){
+  const step = steps[stepIndex];
+  const requiredFields = step.querySelectorAll("input[required], select[required]");
+  for(let field of requiredFields){
+    if(!field.value.trim()){
+      popup.innerText="MUST FILL OUT ALL BLANKS!";
+      popup.className="popup red";
+      popup.style.display="block";
+      setTimeout(()=>{popup.style.display="none";},2000);
+      return false;
+    }
+  }
+  return true;
+}
+
+function nextStepWithValidation(){
+  if(!validateStep(currentStep)) return;
+  if(steps[currentStep+1]?.querySelector("#reviewCardsContainer")) populateCheckout();
+  nextStep();
+}
+
+function nextStep(){ if(currentStep<steps.length-1) showStep(currentStep+1); }
+function prevStep(){ if(currentStep>0) showStep(currentStep-1); }
+
+function addAnotherCard(){
+  const original=document.querySelector(".card-step");
+  const clone=original.cloneNode(true);
+  clone.querySelectorAll("input").forEach(i=>i.value="");
+  clone.querySelectorAll("select").forEach(s=>s.selectedIndex=0);
+  const reviewStep=steps[steps.length-2];
+  reviewStep.parentNode.insertBefore(clone,reviewStep);
+  steps=document.querySelectorAll(".step");
+  showStep(currentStep+1);
+  document.querySelectorAll(".pokemonSearch").forEach(bindSearch);
+}
+
+let pokemonList=[];
+fetch("https://pokeapi.co/api/v2/pokemon?limit=1025")
+  .then(res=>res.json())
+  .then(data=>pokemonList=data.results.map(p=>p.name.charAt(0).toUpperCase()+p.name.slice(1)));
+
+function bindSearch(input){
+  const resultsBox=input.nextElementSibling;
+  input.addEventListener("input",function(){
+    const query=this.value.toLowerCase();
+    resultsBox.innerHTML="";
+    if(!query){ resultsBox.style.display="none"; return; }
+    const filtered=pokemonList.filter(name=>name.toLowerCase().includes(query));
+    if(filtered.length>0){
+      resultsBox.style.display="block";
+      filtered.slice(0,15).forEach(name=>{
+        const div=document.createElement("div");
+        div.textContent=name;
+        div.onclick=()=>{ input.value=name; resultsBox.style.display="none"; };
+        resultsBox.appendChild(div);
+      });
+    } else resultsBox.style.display="none";
+  });
+  document.addEventListener("click",e=>{if(!e.target.closest(".search-container")) resultsBox.style.display="none";});
+}
+document.querySelectorAll(".pokemonSearch").forEach(bindSearch);
+
+function populateCheckout(){
+  const container=document.getElementById("reviewCardsContainer");
+  const totalBox=document.getElementById("totalBox");
+  container.innerHTML="";
+  const cards = document.querySelectorAll(".card-step");
+  cards.forEach((card,index)=>{
+    const pokemon = card.querySelector('input[data-field="pokemon"]').value || "";
+    const variant = card.querySelector('select[data-field="variant"]').value || "";
+    const year = card.querySelector('input[data-field="year"]').value || "";
+    const set = card.querySelector('input[data-field="set"]').value || "";
+    const edition = card.querySelector('input[data-field="edition"]').value || "";
+    const declared = card.querySelector('input[data-field="declared"]').value || "";
+    container.innerHTML+=`<div class="card-review">
+      <strong>Card #${index+1}</strong><br>
+      Pokémon: ${pokemon}<br>
+      Variant: ${variant}<br>
+      Year: ${year}<br>
+      Set: ${set}<br>
+      Edition: ${edition}<br>
+      Declared Value: ${declared}
+    </div>`;
+  });
+
+  const country = document.querySelector(".step.active input[placeholder='Country']")?.value || "";
+  const state = document.querySelector(".step.active input[placeholder='State']")?.value || "";
+  const taxRate = getTaxRate(country,state);
+
+  let total = cards.length*25 + 10; // cards + shipping
+  total *= 1 + taxRate;
+  total -= appliedDiscount;
+  if(total<0) total=0;
+  totalBox.textContent=`Total: $${total.toFixed(2)}`;
+}
+
+document.getElementById("validatePromoBtn").onclick=function(){
+  const code=document.getElementById("promoCodeInput").value.trim().toUpperCase();
+  const cards = document.querySelectorAll(".card-step");
+  appliedDiscount=0;
+
+  if(code==="OLDPOKECARD"){ appliedDiscount=10; popup.innerText="Promo Applied - Saved $10!"; popup.className="popup green"; popup.style.display="block"; setTimeout(()=>{popup.style.display="none";},2000);}
+  else if(code==="FUSION10%"){ appliedDiscount=cards.length*25*0.10; popup.innerText="Promo Applied - Saved $"+appliedDiscount.toFixed(2); popup.className="popup green"; popup.style.display="block"; setTimeout(()=>{popup.style.display="none";},2000);}
+  else if(code==="15OFFSLAB"){ appliedDiscount=15; popup.innerText="Promo Applied - Saved $15!"; popup.className="popup green"; popup.style.display="block"; setTimeout(()=>{popup.style.display="none";},2000);}
+  else if(code==="SLABDEAL"){ appliedDiscount=5*cards.length; popup.innerText="Promo Applied - $5 off EACH card! Total Saved: $"+appliedDiscount; popup.className="popup green"; popup.style.display="block"; setTimeout(()=>{popup.style.display="none";},2000);}
+  else if(code==="SHIPFREE"){ appliedDiscount=10; popup.innerText="Promo Applied - Free Shipping ($10)"; popup.className="popup green"; popup.style.display="block"; setTimeout(()=>{popup.style.display="none";},2000);}
+  else{ popup.innerText="INVALID CODE"; popup.className="popup red"; popup.style.display="block"; setTimeout(()=>{popup.style.display="none";},2000);}
+  populateCheckout();
+}
+
+function sendEmailToOwner(name, email, address, state, country, cardDetails, total){
+  const templateParams = {
+    name: name,
+    email: email,
+    address: address,
+    state: state,
+    country: country,
+    cardDetails: cardDetails,
+    total: total,
+    timestamp: new Date().toLocaleString()
+  };
+
+  emailjs.send("service_6s1brmn", "template_vs55gr5", templateParams)
+    .then(function(response) {
+       console.log("Email sent successfully!", response);
+    }, function(error) {
+       console.error("Email failed to send:", error);
+    });
+}
+
+function submitFinalStep(){
+  if(!validateStep(currentStep)) return;
+
+  const accountStep = steps[0];
+  const name = accountStep.querySelector('input[type="text"]').value;
+  const email = accountStep.querySelector('input[type="email"]').value;
+  const address = accountStep.querySelector('input[placeholder="Address"]').value;
+  const country = accountStep.querySelector('input[placeholder="Country"]').value;
+  const state = accountStep.querySelector('input[placeholder="State"]').value;
+
+  const cards = document.querySelectorAll(".card-step");
+  let cardDetails = "";
+  cards.forEach((card,index)=>{
+    const pokemon = card.querySelector('input[data-field="pokemon"]').value || "";
+    const variant = card.querySelector('select[data-field="variant"]').value || "";
+    const year = card.querySelector('input[data-field="year"]').value || "";
+    const set = card.querySelector('input[data-field="set"]').value || "";
+    const edition = card.querySelector('input[data-field="edition"]').value || "";
+    const declared = card.querySelector('input[data-field="declared"]').value || "";
+    cardDetails += `Card #${index+1}\nPokémon: ${pokemon}\nVariant: ${variant}\nYear: ${year}\nSet: ${set}\nEdition: ${edition}\nDeclared Value: ${declared}\n\n`;
+  });
+
+  const totalAmount = document.getElementById("totalBox").textContent;
+
+  sendEmailToOwner(name, email, address, state, country, cardDetails, totalAmount);
+
+  showStep(steps.length-1); // Show Step 5
+}
+</script>
+</body>
+</html>
